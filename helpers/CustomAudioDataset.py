@@ -25,7 +25,7 @@ class CustomAudioDataset(Dataset):
         label      = int(audio_file.split('_')[0])
         AUDIO_PATH = os.path.join(self.audio_dir, audio_file)
         x, sr  = librosa.load(AUDIO_PATH, sr = self.sampling_rate) 
-        out = self.transform(x)
+        out = self.transform(x, sr)
         return out, label
 
         

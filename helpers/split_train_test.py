@@ -8,6 +8,11 @@ import warnings
 warnings.filterwarnings("ignore")
 
 def split_train_test_by_mtdata(DATA_PATH, MDT_PATH, random_state = 0):
+  '''
+  split data into train and test and further divide audio based on target into folders.
+  This split is done based on metadata file . 
+  '''
+
   sdr_df = pd.read_csv(MDT_PATH, sep='\t', header=0, index_col='Unnamed: 0')
 
   # create directory for split data
