@@ -12,10 +12,9 @@ import torch
 # split_train_test_by_mtdata(DATA_PATH, MDT_PATH)
 
 model = CNN1D()
-loss  = nn.NLLLoss()
+loss  = nn.CrossEntropyLoss()
 device  = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-optimizer = SGD(model.parameters(), lr = 0.01, momentum = 0.9)
-# optimizer = Adam(model.parameters(), lr = 0.001)
+optimizer = SGD(model.parameters(), lr = 0.01)
 epochs = 10
 
 model = train(model, loss, optimizer, None, device, epochs, True)

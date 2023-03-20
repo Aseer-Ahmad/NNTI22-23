@@ -40,29 +40,35 @@ class CNN2D(nn.Module):
 class CNN1D(nn.Module):
     def __init__(self, in_C = 13):
         super(CNN1D, self).__init__()
-        self.conv1 = nn.Conv1d(in_channels=in_C, out_channels=32, kernel_size=3)
-        self.conv2 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3)
-        self.conv3 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3)
+
+        layers = []
         
-        self.pool = nn.MaxPool1d(kernel_size=2, stride=2)
-                
+        layers.append(nn.Conv1d(in_channels=in_C, out_channels=32, kernel_size=3))
+        layers.append(nn.BatchNorm1d(32))        
+        layers.append(nn.ReLU())
+
+        layers.append(nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3))
+        layers.append(nn.BatchNorm1d(64))        
+        layers.append(nn.Dropout(p = 0.2))
+        layers.append(nn.ReLU())
+        
+        layers.append(nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3))
+        layers.append(nn.BatchNorm1d(128))        
+        layers.append(nn.ReLU())
+        
+        layers.append(nn.MaxPool1d(kernel_size=2, stride=2))
+        
+        layers.append(nn.Flatten())
+        layers.append(nn.Linear( 39936, 64, dtype=float))
+        
+        layers.append(nn.ReLU())
+        layers.append(nn.Linear( 64, 10))
+        
+        self.layers = nn.Sequential(*layers)
+
     def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = self.pool(x)
-        x = F.relu(self.conv2(x))
-        x = self.pool(x)
-        x = F.relu(self.conv3(x))
 
-        x = self.pool(x)
-
-        x = x.view(x.size(0), -1)
-        
-        fc1 = nn.Linear( x.size(1), 64, dtype=float)
-        x = fc1(x)
-        x = F.relu(x)
-
-        fc2 = nn.Linear( 64, 10 , dtype=float)
-        x = fc2(x)
+        x = self.layers(x)
         
         return x
 

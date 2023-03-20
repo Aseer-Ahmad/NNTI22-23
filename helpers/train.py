@@ -40,19 +40,21 @@ def train(model, loss, optimizer, scheduler, device, epochs, val = True):
             
             loss_val = loss(outputs, labels)
         
+            optimizer.zero_grad()
             loss_val.backward()
             optimizer.step()
-            optimizer.zero_grad()
             
             if scheduler is not None:
                 scheduler.step()
                 
             running_loss += loss_val.item()
 
-            metrics_dict = audMetrics(outputs, labels, preds)
+            # metrics_dict = audMetrics(outputs, labels, preds)
             
-            print(f'Epoch {epoch}/{epochs} , Step {i}/{len(trainLoader)} train loss : {running_loss / i}')
+            print(f'Epoch {epoch}/{epochs} , Step {i}/{len(trainLoader)} train loss : {running_loss / i} ')
+            # print(f'accuracy : { metrics_dict["accuracy"] } precision : { metrics_dict["precision"] } recall : { metrics_dict["recall"] } f1 : { metrics_dict["f1"] }\n')
 
+        
         if val:
             model.eval()
             with torch.no_grad():
