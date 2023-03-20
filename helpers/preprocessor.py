@@ -108,9 +108,8 @@ def extract_melspectrogram(signal, sr, num_mels):
 
 
 
-PTH = '/home/cepheus/My GIT/NNTI 22-23/speech_data'
-for aud in os.listdir(PTH):
-    x, sr  = librosa.load( os.path.join(PTH, aud), sr = 8000) 
-    t = transformMelSpecByTruncate2D(x, sr)
-    print(aud + " done ! with shape" + str(t.shape))
-    break
+# PTH = '/home/cepheus/My GIT/NNTI 22-23/speech_data'
+# for aud in os.listdir(PTH):
+#     x, sr  = librosa.load( os.path.join(PTH, aud), sr = 8000) 
+#     t = transformMelSpecByTruncate2D(x, sr)
+#     print(aud + " done ! with shape" + str(t.shape))

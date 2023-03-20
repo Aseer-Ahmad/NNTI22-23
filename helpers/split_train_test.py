@@ -105,4 +105,3 @@ def split_train_test_by_user(ABSOLUTE_PTH, test_size = 0.2, random_state = 0):
     shutil.copy( os.path.join(ABSOLUTE_PTH, test_file) , os.path.join(TEST_DIR, test_file))
 
 
-split_train_test_by_mtdata('/home/cepheus/My GIT/NNTI 22-23/speech_data', '/home/cepheus/My GIT/NNTI 22-23/SDR_metadata.tsv')

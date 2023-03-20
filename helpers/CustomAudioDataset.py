@@ -2,7 +2,7 @@ from __future__ import print_function, division
 from email.mime import audio
 import os
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 import librosa
 
 # Ignore warnings
