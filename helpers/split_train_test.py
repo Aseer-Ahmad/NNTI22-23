@@ -7,7 +7,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 import warnings
 warnings.filterwarnings("ignore")
 
-def split_train_test_by_mtdata(DATA_PATH, MDT_PATH, random_state = 0):
+def split_train_test_by_mtdata(DATA_PATH, MDT_PATH, speakers = None, random_state = 0):
   '''
   split data into train and test and further divide audio based on target into folders.
   This split is done based on metadata file . 
@@ -42,9 +42,11 @@ def split_train_test_by_mtdata(DATA_PATH, MDT_PATH, random_state = 0):
   for idx, row in sdr_df.iterrows():
     SPLIT_TYP, filename = row['split'], row['file']
     filename            = filename.split('/')[1]
-
+    speakername         = str(filename.split('_')[1])
+       
     if SPLIT_TYP == 'TRAIN':
-      shutil.copy( os.path.join(DATA_PATH, filename) , os.path.join(TRAIN_DIR, filename))
+      if speakers != None and speakername in speakers:
+        shutil.copy( os.path.join(DATA_PATH, filename) , os.path.join(TRAIN_DIR, filename))
     elif SPLIT_TYP == 'DEV':
       shutil.copy( os.path.join(DATA_PATH, filename) , os.path.join(DEV_DIR, filename))
     elif SPLIT_TYP == 'TEST':

@@ -32,8 +32,7 @@ def transformAudioVecByTruncate1D(audio_vec, sr):
 def transformAudioVecByInterpolate(audio_vec, sr):
     pass
 
-def transformAudioVecByEmbeddings(audio_vec, sr):
-    pass
+   
 
 def transformMelSpecByTruncate2D(audio_vec, sr):
     '''
@@ -59,6 +58,33 @@ def transformMelSpecByTruncate2D(audio_vec, sr):
     audio_torch = torch.reshape(torch.from_numpy(audio_arr), (1, FREQ_BANDS, MAX_COMP_ALL_BANDS))
 
     return audio_torch
+
+def transformMelSpecByMeanPooling1D(audio_vec, N):
+
+    FREQ_BANDS = 13
+    SR         = 8000
+    pooled     = np.zeros((FREQ_BANDS, N))
+    stride     = 1
+
+    scaled_log_mel_features = extract_melspectrogram(audio_vec, SR, FREQ_BANDS) # K x T
+    T = scaled_log_mel_features.shape[1]
+
+    # f = t - n + 1
+    kernel_size = T - N + 1
+
+    i = 0
+
+    while i + kernel_size < T : 
+
+        kernel_window = scaled_log_mel_features[ : , i : i + kernel_size ]
+        mean_pool     = np.mean(kernel_window, axis= 1)
+        pooled[:, i]  = mean_pool
+        i += 1
+
+    return pooled
+
+
+
 
 def transformMelSpecByTruncate1D(audio_vec, sr):
     '''
@@ -87,6 +113,12 @@ def transformMelSpecByTruncate1D(audio_vec, sr):
     return audio_torch
 
 
+def transformMFCCByTruncate1D(audio_vec, sr):
+    pass
+
+def extract_MFCC(signal, sr, num_mels):
+    pass
+
 def extract_melspectrogram(signal, sr, num_mels):
 
     mel_features = librosa.feature.melspectrogram(y=signal,
@@ -108,8 +140,9 @@ def extract_melspectrogram(signal, sr, num_mels):
 
 
 
-# PTH = '/home/cepheus/My GIT/NNTI 22-23/speech_data'
-# for aud in os.listdir(PTH):
-#     x, sr  = librosa.load( os.path.join(PTH, aud), sr = 8000) 
-#     t = transformMelSpecByTruncate2D(x, sr)
-#     print(aud + " done ! with shape" + str(t.shape))
+PTH = '/home/cepheus/My GIT/NNTI 22-23/speech_data'
+for aud in os.listdir(PTH):
+    x, sr  = librosa.load( os.path.join(PTH, aud), sr = 8000) 
+    t = transformMelSpecByMeanPooling1D(x, 23)
+    print(aud + " done ! with shape" + str(t.shape))
+    # break
