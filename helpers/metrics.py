@@ -1,6 +1,7 @@
+from cProfile import label
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
-def audMetrics(output, labels, preds):
+def audMetrics(labels, preds):
     
     metric_dict = {"accuracy" : None, 
                    "precision" : None, 
@@ -8,10 +9,13 @@ def audMetrics(output, labels, preds):
                    "f1" : None 
     }
 
-    metric_dict["accuracy"] = accuracy_score(labels, preds )
+    labels = labels.cpu().numpy()
+    preds  = preds.cpu().numpy()   
+
+    metric_dict["accuracy"]  = accuracy_score(labels, preds )
     metric_dict["precision"] = precision_score(labels, preds, average = 'micro' )
-    metric_dict["recall"] = recall_score(labels, preds, average = 'micro' )
-    metric_dict["f1"] = f1_score(labels, preds, average = 'micro' )
+    metric_dict["recall"]    = recall_score(labels, preds, average = 'micro' )
+    metric_dict["f1"]        = f1_score(labels, preds, average = 'micro' )
 
     return metric_dict
 
