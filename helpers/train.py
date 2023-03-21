@@ -8,6 +8,8 @@ from helpers.CustomAudioDataset import CustomAudioDataset
 from torch.utils.data import DataLoader
 import os
 
+# add summaryWriters for train test val metrics
+
 def train(model, loss, optimizer, scheduler, device, epochs, transform, sr, batch_size, val = True):
 
     model = model.to(device)
@@ -97,6 +99,7 @@ def test(model, TEST_PTH, loss, transform,  device, sr):
         runn_f1     += metrics_dict["f1"]
 
     print(f"test loss {runn_loss/lenDataSet} accuracy {runn_acc/lenDataSet} precision {runn_prec/lenDataSet} recall {runn_rec/lenDataSet} f1 {runn_f1/lenDataSet}")
+
 
         
 
