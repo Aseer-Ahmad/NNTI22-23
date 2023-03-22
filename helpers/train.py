@@ -34,6 +34,7 @@ def train(model, loss, optimizer, scheduler, device, epochs, transform, sr, batc
     iteration_num = 1
     tb = SummaryWriter()
     aud, labels = next(iter(trainLoader))
+    aud = aud.to(device)
     tb.add_graph(model, aud)
 
     for epoch in range(1, epochs+1):
@@ -56,7 +57,7 @@ def train(model, loss, optimizer, scheduler, device, epochs, transform, sr, batc
             loss_val.backward()
             optimizer.step()
             
-            if scheduler is not None:
+            if scheduler is not None and epoch%3==0:
                 scheduler.step()
                 
             running_loss += loss_val.item()
@@ -66,58 +67,54 @@ def train(model, loss, optimizer, scheduler, device, epochs, transform, sr, batc
             print(f'Epoch {epoch}/{epochs} , Step {i}/{len(trainLoader)} train loss : {running_loss / i} ')
             print(f'accuracy : { metrics_dict["accuracy"] } precision : { metrics_dict["precision"] } recall : { metrics_dict["recall"] } f1 : { metrics_dict["f1"] }')
 
-            # tb.add_scalar("train Loss", running_loss / i, iteration_num)
-            # tb.add_scalar("train accuracy", metrics_dict["accuracy"] , iteration_num)
 
             running_loss_val = 0
             runn_acc_val     = 0
             runn_f1_val    = 0
 
-            if val:
-                model.eval()
-                with torch.no_grad():
-                    for aud, labels in valLoader:
-                        aud = aud.to(device)
-                        labels = labels.to(device)
-                        out  = model(aud)
-                        loss_val = loss(out, labels)
-                        running_loss_val += loss_val.item()
-                        _, preds = torch.max(out, 1)
-                        metrics_dict_val = audMetrics(labels, preds)
-                        runn_acc_val    += metrics_dict_val["accuracy"]
-                        runn_f1_val     += metrics_dict_val["f1"]
+            # if val:
+            #     model.eval()
+            #     with torch.no_grad():
+            #         for aud, labels in valLoader:
+            #             aud = aud.to(device)
+            #             labels = labels.to(device)
+            #             out  = model(aud)
+            #             loss_val = loss(out, labels)
+            #             _, preds = torch.max(out, 1)
+            #             metrics_dict_val = audMetrics(labels, preds)
+            #             running_loss_val += loss_val.item()
+            #             runn_acc_val    += metrics_dict_val["accuracy"]
+            #             runn_f1_val     += metrics_dict_val["f1"]
 
-                print(f"val loss : {running_loss_val/len(valLoader)}")
+            #     print(f"val loss : {running_loss_val/len(valLoader)}")
 
-                # tb.add_scalar("val Loss", running_loss_val/len(valLoader), iteration_num)
 
-            metrics_dict_test, _, _, _ = test(model, TEST_PTH, loss, transform, device, sr )
-            # tb.add_scalar("test Loss", metrics_dict["test_loss"], iteration_num)
+        metrics_dict_test, _, _, _ = test(model, TEST_PTH, loss, transform, device, sr )
 
-            print()
+            # print()
             
-            # scalars for tensorboard
-            tb.add_scalars(f'loss/check_info', {
-                'train loss ': running_loss/i,
-                'test loss': metrics_dict["test_loss"],
-                'val loss': running_loss_val/len(valLoader)
-            }, iteration_num)
+            # # scalars for tensorboard
+            # tb.add_scalars(f'loss/check_info', {
+            #     'train loss ': running_loss/i,
+            #     'test loss': metrics_dict_test["test_loss"],
+            #     'val loss': running_loss_val/len(valLoader)
+            # }, iteration_num)
 
-            tb.add_scalars(f'accuracy/check_info', {
-                'train accuracy ': metrics_dict["accuracy"],
-                'test accuracy': metrics_dict_test["accuracy"],
-                'val accuracy': runn_acc_val / len(valLoader)
-            }, iteration_num)
+            # tb.add_scalars(f'accuracy/check_info', {
+            #     'train accuracy ': metrics_dict["accuracy"],
+            #     'test accuracy': metrics_dict_test["accuracy"],
+            #     'val accuracy': runn_acc_val / len(valLoader)
+            # }, iteration_num)
 
-            tb.add_scalars(f'f1/check_info', {
-                'train accuracy ': metrics_dict["f1"],
-                'test accuracy': metrics_dict_test["f1"],
-                'val accuracy': runn_f1_val / len(valLoader)
-            }, iteration_num)
+            # tb.add_scalars(f'f1/check_info', {
+            #     'train accuracy ': metrics_dict["f1"],
+            #     'test accuracy': metrics_dict_test["f1"],
+            #     'val accuracy': runn_f1_val / len(valLoader)
+            # }, iteration_num)
 
-            iteration_num += 1
+            # iteration_num += 1
 
-            model.train()
+            # model.train()
 
     tb.close()
 

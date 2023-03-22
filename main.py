@@ -7,6 +7,7 @@ from models.baseline import BaseLine_Linear1D
 
 import torch.nn as nn
 from torch.optim import SGD, Adam, RMSprop
+from torch.optim.lr_scheduler import StepLR
 import torch
 import numpy as np
 
@@ -50,12 +51,13 @@ MDT_PATH  = os.path.join(os.getcwd(), 'SDR_metadata.tsv')
 # print("splits created")
 
 device  = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-epochs = 2
+epochs = 10
 SR     = 8000
 batch_size = 32
 
 model = CNN1D()
-optimizer = SGD(model.parameters(), lr = 0.001)
+optimizer = Adam(model.parameters(), lr = 0.001)
+scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
 loss  = nn.CrossEntropyLoss()
 
 model = train(model, loss, optimizer, None, device, epochs, transformMelSpecByTruncate1D, SR, batch_size, True)
