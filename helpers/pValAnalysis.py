@@ -88,10 +88,20 @@ def evaluate_Pvalue(model_1, model_2, transform_1, transform_2, opt_1, opt_2, lo
 
     
 def test(model, testDataset):
+    # can use data loader
+
     pass
 
-def learn():
-    pass
+def learn(model, loss, opt, train_x, train_y, device, epochs, batch_size):
+    
+    train_size 			= train_x.shape[0]
+	total_iter 			= int(np.ceil(train_size / batch_size))
+
+    for epoch in epochs:
+        for iter_ in range(total_iter):
+            
+
+    
 
 
 
