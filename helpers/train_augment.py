@@ -10,22 +10,22 @@ import os
 
 # add summaryWriters for train test val metrics
 
-def train(model, loss, optimizer, scheduler, device, epochs, transform, sr, batch_size, speaker:str, val = True):
+def train(model, loss, optimizer, scheduler, device, epochs, raw_augment,transform, spec_augment, sr, batch_size, speaker:str, val = True):
 
     model = model.to(device)
     model = model.double()
 
     PARENT_PTH = os.getcwd()
-    # TRAIN_PTH = os.path.join(PARENT_PTH, 'data', speaker,'train')
-    # VAL_PTH   = os.path.join(PARENT_PTH, 'data', speaker, 'dev')
-    TRAIN_PTH = os.path.join(PARENT_PTH, 'data','train')
-    VAL_PTH   = os.path.join(PARENT_PTH, 'data', 'dev')
+    TRAIN_PTH = os.path.join(PARENT_PTH, 'data', speaker,'train')
+    VAL_PTH   = os.path.join(PARENT_PTH, 'data', speaker, 'dev')
+    # TRAIN_PTH = os.path.join(PARENT_PTH, 'data','train')
+    # VAL_PTH   = os.path.join(PARENT_PTH, 'data', 'dev')
 
-    trainDataSet = CustomAudioDatasetAug(TRAIN_PTH, sr, transform)
+    trainDataSet = CustomAudioDatasetAug(TRAIN_PTH, sr, raw_augment,transform,spec_augment)
     trainLoader = DataLoader(trainDataSet, batch_size  = batch_size, shuffle = True)
 
     if val:
-        valDataSet  = CustomAudioDataset(VAL_PTH, sr, transform)
+        valDataSet  = CustomAudioDatasetAug(VAL_PTH, sr, raw_augment,transform,spec_augment)
         valLoader   = DataLoader(valDataSet, batch_size  = len(valDataSet), shuffle = True)
 
     for epoch in range(1, epochs+1):
@@ -71,11 +71,11 @@ def train(model, loss, optimizer, scheduler, device, epochs, transform, sr, batc
 
     return model
 
-def test(model, TEST_PTH, loss, transform,  device, sr, speaker:str):
+def test(model, TEST_PTH, loss, raw_augment,transform, spec_augment, device, sr, speaker:str):
 
     model.eval()
 
-    testDataSet = CustomAudioDatasetAug(TEST_PTH, sr, transform)
+    testDataSet = CustomAudioDatasetAug(TEST_PTH, sr, raw_augment,transform,spec_augment)
     trainLoader = DataLoader(testDataSet, batch_size  = 32)
     lenDataSet  = len(trainLoader)
     runn_loss   = 0
