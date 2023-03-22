@@ -2,8 +2,9 @@
 class : preprocessor.py
 description : all methods should return a torch vector
 '''
-from sklearn.preprocessing import maxabs_scale
+from multiprocessing import pool
 import torch
+import torch.nn.functional as F
 import numpy as np
 import librosa
 from sklearn  import preprocessing
@@ -59,14 +60,13 @@ def transformMelSpecByTruncate2D(audio_vec, sr):
 
     return audio_torch
 
-def transformMelSpecByMeanPooling1D(audio_vec, N):
+def transformMelSpecByMeanPooling1D(audio_vec, sr):
 
-    FREQ_BANDS = 13
-    SR         = 8000
-    pooled     = np.zeros((FREQ_BANDS, N))
-    stride     = 1
+    FREQ_BANDS = 81
+    N          = 15
+    pooled     = torch.zeros((FREQ_BANDS, N), dtype = torch.float64)
 
-    scaled_log_mel_features = extract_melspectrogram(audio_vec, SR, FREQ_BANDS) # K x T
+    scaled_log_mel_features = extract_melspectrogram(audio_vec, sr, FREQ_BANDS) # K x T
     T = scaled_log_mel_features.shape[1]
 
     # f = t - n + 1
@@ -74,16 +74,16 @@ def transformMelSpecByMeanPooling1D(audio_vec, N):
 
     i = 0
 
-    while i + kernel_size < T : 
+    while i + kernel_size <= T : 
 
         kernel_window = scaled_log_mel_features[ : , i : i + kernel_size ]
         mean_pool     = np.mean(kernel_window, axis= 1)
-        pooled[:, i]  = mean_pool
+        pooled[:, i]  = torch.from_numpy(mean_pool)
         i += 1
 
+    pooled = torch.flatten(pooled).view(-1)
+
     return pooled
-
-
 
 
 def transformMelSpecByTruncate1D(audio_vec, sr):
@@ -140,9 +140,11 @@ def extract_melspectrogram(signal, sr, num_mels):
 
 
 
-PTH = '/home/cepheus/My GIT/NNTI 22-23/speech_data'
-for aud in os.listdir(PTH):
-    x, sr  = librosa.load( os.path.join(PTH, aud), sr = 8000) 
-    t = transformMelSpecByMeanPooling1D(x, 23)
-    print(aud + " done ! with shape" + str(t.shape))
-    # break
+# PTH = '/home/cepheus/My GIT/NNTI 22-23/speech_data'
+# for aud in os.listdir(PTH):
+#     if aud == '3_theo_11.wav':
+#         x, sr  = librosa.load( os.path.join(PTH, aud), sr = 8000) 
+#         t = transformMelSpecByMeanPooling1D(x, sr)
+#         print(aud + " done ! with shape" + str(t.shape))
+#         print(t)
+    

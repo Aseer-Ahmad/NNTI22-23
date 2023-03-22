@@ -6,36 +6,37 @@ from models.rnn import RNN1D
 from models.baseline import BaseLine_Linear1D
 
 import torch.nn as nn
-from torch.optim import SGD, Adam
+from torch.optim import SGD, Adam, RMSprop
 import torch
 import numpy as np
 
-from helpers.preprocessor import transformMelSpecByTruncate1D, transformMelSpecByTruncate2D
+from helpers.preprocessor import transformMelSpecByTruncate1D, transformMelSpecByTruncate2D, transformMelSpecByMeanPooling1D
 import os
 
 
 # Task I
-speakers = ['nicolas', 'theo' , 'jackson', 'george']
 
-TEST_PTH  = os.path.join(os.getcwd(), 'data', 'test')
-DATA_PATH = os.path.join(os.getcwd(), 'speech_data')
-MDT_PATH  = os.path.join(os.getcwd(), 'SDR_metadata.tsv')
+# speakers = ['nicolas', 'theo' , 'jackson', 'george']
 
-split_train_test_by_mtdata(DATA_PATH, MDT_PATH, speakers)
+# TEST_PTH  = os.path.join(os.getcwd(), 'data', 'test')
+# DATA_PATH = os.path.join(os.getcwd(), 'speech_data')
+# MDT_PATH  = os.path.join(os.getcwd(), 'SDR_metadata.tsv')
 
-device  = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-epochs = 2
-SR     = 8000
-batch_size = 32
+# split_train_test_by_mtdata(DATA_PATH, MDT_PATH, speakers)
 
-model     = BaseLine_Linear1D()
-optimizer = SGD(model.parameters(), lr = 0.01)
-loss      = nn.CrossEntropyLoss()
+# device  = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# epochs = 2
+# SR     = 8000
+# batch_size = 32
+# FREQ_BANDS  = 81
+# DOWNSAMPLE_N = 15
 
-model = train(model, loss, optimizer, None, device, epochs, transformMelSpecByTruncate1D, SR, batch_size, False)
-metrics_dict, test_x, test_y, preds = test(model, TEST_PTH, loss, transformMelSpecByTruncate1D, device, SR)
+# model     = BaseLine_Linear1D(FREQ_BANDS * DOWNSAMPLE_N)
+# optimizer = SGD(model.parameters(), lr = 0.0009)
+# loss      = nn.CrossEntropyLoss()
 
-
+# model = train(model, loss, optimizer, None, device, epochs, transformMelSpecByMeanPooling1D, SR, batch_size, False)
+# metrics_dict, test_x, test_y, preds = test(model, TEST_PTH, loss, transformMelSpecByMeanPooling1D, device, SR)
 
 
 
@@ -44,7 +45,9 @@ TEST_PTH  = os.path.join(os.getcwd(), 'data', 'test')
 DATA_PATH = os.path.join(os.getcwd(), 'speech_data')
 MDT_PATH  = os.path.join(os.getcwd(), 'SDR_metadata.tsv')
 
+# print("creating new data splits")
 # split_train_test_by_mtdata(DATA_PATH, MDT_PATH)
+# print("splits created")
 
 device  = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 epochs = 2
@@ -52,27 +55,28 @@ SR     = 8000
 batch_size = 32
 
 model = CNN1D()
-optimizer = SGD(model.parameters(), lr = 0.01)
+optimizer = SGD(model.parameters(), lr = 0.001)
 loss  = nn.CrossEntropyLoss()
 
-model = train(model, loss, optimizer, None, device, epochs, transformMelSpecByTruncate1D, SR, batch_size, False)
+model = train(model, loss, optimizer, None, device, epochs, transformMelSpecByTruncate1D, SR, batch_size, True)
 metrics_dict, test_x, test_y, preds = test(model, TEST_PTH, loss, transformMelSpecByTruncate1D, device, SR)
-plot3D_tsne(test_x, test_y, preds, "CNN1D_epoch_2_3D.jpg")
+# plot3D_tsne(test_x, test_y, preds, "CNN1D_epoch_2_3D.jpg")
 
 
 
 
-# model = CNN2D()
-# optimizer = SGD(model.parameters(), lr = 0.01)
-# loss  = nn.CrossEntropyLoss()
+# # model = CNN2D()
+# # optimizer = SGD(model.parameters(), lr = 0.01)
+# # loss  = nn.CrossEntropyLoss()
 
-# model = train(model, loss, optimizer, None, device, epochs, transformMelSpecByTruncate2D, SR, batch_size, False)
-# test(model, TEST_PTH, loss, transformMelSpecByTruncate2D, device, SR)
+# # model = train(model, loss, optimizer, None, device, epochs, transformMelSpecByTruncate2D, SR, batch_size, False)
+# # test(model, TEST_PTH, loss, transformMelSpecByTruncate2D, device, SR)
 
 
-# model = RNN1D(input_size=630, hidden_size=32 , num_layers=2 , device=device)
-# optimizer = Adam(model.parameters(), lr = 0.01)
-# loss  = nn.CrossEntropyLoss()
 
-# model = train(model, loss, optimizer, None, device, epochs, transformMelSpecByTruncate1D, SR, batch_size, False)
-# test(model, TEST_PTH, loss, transformMelSpecByTruncate1D, device, SR)
+# # model = RNN1D(input_size=630, hidden_size=32 , num_layers=2 , device=device)
+# # optimizer = Adam(model.parameters(), lr = 0.01)
+# # loss  = nn.CrossEntropyLoss()
+
+# # model = train(model, loss, optimizer, None, device, epochs, transformMelSpecByTruncate1D, SR, batch_size, False)
+# # test(model, TEST_PTH, loss, transformMelSpecByTruncate1D, device, SR)

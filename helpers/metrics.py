@@ -13,9 +13,9 @@ def audMetrics(labels, preds):
     preds  = preds.cpu().numpy()   
 
     metric_dict["accuracy"]  = accuracy_score(labels, preds )
-    metric_dict["precision"] = precision_score(labels, preds, average = 'micro' )
-    metric_dict["recall"]    = recall_score(labels, preds, average = 'micro' )
-    metric_dict["f1"]        = f1_score(labels, preds, average = 'micro' )
+    metric_dict["precision"] = precision_score(labels, preds, average = 'macro' )
+    metric_dict["recall"]    = recall_score(labels, preds, average = 'macro' )
+    metric_dict["f1"]        = f1_score(labels, preds, average = 'macro' )
 
     return metric_dict
 

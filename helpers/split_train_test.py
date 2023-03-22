@@ -45,7 +45,7 @@ def split_train_test_by_mtdata(DATA_PATH, MDT_PATH, speakers = None, random_stat
     speakername         = str(filename.split('_')[1])
        
     if SPLIT_TYP == 'TRAIN':
-      if speakers != None and speakername in speakers:
+      if speakers == None or speakername in speakers:
         shutil.copy( os.path.join(DATA_PATH, filename) , os.path.join(TRAIN_DIR, filename))
     elif SPLIT_TYP == 'DEV':
       shutil.copy( os.path.join(DATA_PATH, filename) , os.path.join(DEV_DIR, filename))

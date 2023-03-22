@@ -2,6 +2,11 @@ from sklearn.manifold import TSNE
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def prepareDataforTensorBoard(inp, pred_labels, filename):
+    pass
+
+
 def TSNEreduce(inp, n_comp, perplexity=3 ):
     X_emb = TSNE(n_components=n_comp, learning_rate='auto',init='random', perplexity=perplexity).fit_transform(inp)
     return X_emb 
