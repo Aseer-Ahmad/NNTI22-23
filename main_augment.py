@@ -64,26 +64,8 @@ loss  = nn.CrossEntropyLoss()
 
 model = train(model, loss, optimizer, None, device, epochs, raw_augment_train, transform, spec_augment_train, SR, batch_size, speaker=speaker,val=False)
 
-# for speaker in os.listdir(os.path.join(os.getcwd(), 'data')):
-# TEST_PTH  = os.path.join(os.getcwd(), 'data','test')
-#     # TEST_PTH  = os.path.join(os.getcwd(), 'data', speaker,'test')
-# test(model, TEST_PTH, loss, augment_test,transform, device, SR,speaker)
 
 for speaker in os.listdir(os.path.join(os.getcwd(), 'data')):
     TEST_PTH  = os.path.join(os.getcwd(), 'data', speaker,'test')
     test(model, TEST_PTH, loss, raw_augment_test,transform, spec_augment_test, device, SR,speaker)
 
-
-# model = CNN2D()
-# optimizer = SGD(model.parameters(), lr = 0.01)
-# loss  = nn.CrossEntropyLoss()
-
-# model = train(model, loss, optimizer, None, device, epochs, transformMelSpecByTruncate2D, SR, batch_size, False)
-# test(model, TEST_PTH, loss, transformMelSpecByTruncate2D, device, SR)
-
-# model = RNN1D(input_size=630, hidden_size=32 , num_layers=2 , device=device)
-# optimizer = Adam(model.parameters(), lr = 0.01)
-# loss  = nn.CrossEntropyLoss()
-
-# model = train(model, loss, optimizer, None, device, epochs, transformMelSpecByTruncate1D, SR, batch_size, False)
-# test(model, TEST_PTH, loss, transformMelSpecByTruncate1D, device, SR)
