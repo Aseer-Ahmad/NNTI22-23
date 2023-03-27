@@ -1,3 +1,4 @@
+from unittest import TestLoader
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 import torch.nn as nn
@@ -89,7 +90,7 @@ def train(model, loss, optimizer, scheduler, device, epochs, transform, sr, batc
             #     print(f"val loss : {running_loss_val/len(valLoader)}")
 
 
-        metrics_dict_test, _, _, _ = test(model, TEST_PTH, loss, transform, device, sr )
+        # metrics_dict_test, _, _, _ = test(model, TEST_PTH, loss, transform, device, sr )
 
             # print()
             
@@ -127,9 +128,9 @@ def test(model, TEST_PTH, loss, transform,  device, sr):
 
     BATCH_SIZE   = 32
     testDataSet  = CustomAudioDataset(TEST_PTH, sr, transform)
-    trainLoader  = DataLoader(testDataSet, batch_size  = BATCH_SIZE)
-    tot_batches  = len(trainLoader)
-    lenDataSet   = len(trainLoader)
+    testLoader  = DataLoader(testDataSet, batch_size  = BATCH_SIZE)
+    tot_batches  = len(testLoader)
+    lenDataSet   = len(testLoader)
     np_preds     = np.zeros((len(testDataSet)))
     runn_loss    = 0
     runn_acc     = 0
@@ -138,7 +139,7 @@ def test(model, TEST_PTH, loss, transform,  device, sr):
     runn_f1      = 0
 
     with torch.no_grad():
-        for i, (aud, labels) in enumerate(trainLoader, start=0):
+        for i, (aud, labels) in enumerate(testLoader, start=0):
             aud      = aud.to(device)
             labels   = labels.to(device)
             outputs  = model(aud)
