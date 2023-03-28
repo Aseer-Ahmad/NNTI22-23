@@ -46,7 +46,6 @@ num_epochs = 10
 sr = 8000
 n_mfcc = 39
 
-
 # Define audio data path and augmentations
 audio_data_path = SPEAKER_TRAINDATA
 
@@ -64,8 +63,8 @@ Raw data augmentation
 raw_augment_train = transforms.RandomChoice([
                     IdentityTransform(),
                     NoiseTransform(),
-                     TimeShiftTransform(),
-                     TimeStretchingTransform(),
+                     TimeShiftTransform()
+                    #  TimeStretchingTransform()
                     ])
 
 raw_augment_test = transforms.Compose([
@@ -117,7 +116,7 @@ num_epochs = 10
 # writer = SummaryWriter('logs')
 for epoch in range(num_epochs):
     running_loss = 0.0
-    for x1, x2 in train_loader: # custom dataloader gives 2 views of the audio data with random (and possibly different) transforms applied
+    for i, (x1, x2) in enumerate(train_loader): # custom dataloader gives 2 views of the audio data with random (and possibly different) transforms applied
         optimizer.zero_grad()
         # get the embeddings
         h1,z1 = model(x1.float())
@@ -125,12 +124,19 @@ for epoch in range(num_epochs):
 
         # create features and labels for the NTXentLoss
         z = torch.cat([z1,z2],dim=0)
+        _, preds = torch.max(z, 1)
         labels = torch.arange(z.shape[0])
         labels[z1.shape[0]:] = labels[:z1.shape[0]]
         loss = criterion(z, labels)
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
+
+        metrics_dict = audMetrics(labels, preds)
+
+        print(f'Epoch {epoch}/{num_epochs} , Step {i}/{len(train_loader)} ')
+        print(f'accuracy : { metrics_dict["accuracy"] } precision : { metrics_dict["precision"] } recall : { metrics_dict["recall"] } f1 : { metrics_dict["f1"] }')
+
     epoch_loss = running_loss / train_dataset.__len__()
     # writer.add_scalar('Loss/train', epoch_loss, epoch)
     print('Epoch [{}/{}], Loss: {:.4f}'.format(epoch+1, num_epochs, epoch_loss))

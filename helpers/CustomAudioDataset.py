@@ -70,6 +70,6 @@ class CustomAudioDatasetCLR(Dataset):
         AUDIO_PATH = os.path.join(self.audio_dir, audio_file)
         x, sr      = librosa.load(AUDIO_PATH, sr = self.sampling_rate) 
         x1, x2     = self.raw_augment(x), self.raw_augment(x)
-        x1,x2          = self.transform(x1), self.transform(x2)
-        out1,out2        = self.spec_augment(x1), self.spec_augment(x2)
+        x1, x2     = self.transform(x1), self.transform(x2)
+        out1,out2  = self.spec_augment(x1), self.spec_augment(x2)
         return out1, out2 

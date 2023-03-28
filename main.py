@@ -1,4 +1,3 @@
-# main
 from helpers.split_train_test import split_train_test_by_mtdata
 from helpers.train import train
 from helpers.pValAnalysis import evaluate_Pvalue
