@@ -22,24 +22,28 @@ def evaluate_Pvalue(model_1, model_2, transform_1, transform_2, opt_1, opt_2, lo
     trainDataSet_1_x, trainDataSet_1_y = np.array(trainDataSet_1)[:, 0], np.array(trainDataSet_1)[:, 1]
     trainDataSet_2_x, trainDataSet_2_y = np.array(trainDataSet_2)[:, 0], np.array(trainDataSet_2)[:, 1]
     
+    print("Training Model-1")
     model_1 = learn(model_1, loss, opt_1, trainDataSet_1_x, trainDataSet_1_y, device, epochs, batch_size)
+    print("Training Model-2")
     model_2 = learn(model_2, loss, opt_2, trainDataSet_2_x, trainDataSet_2_y, device, epochs, batch_size)
 
-    metrics_dict_1 = test(model_1, testDataset_1)
-    metrics_dict_2 = test(model_2, testDataset_2)
+    metrics_dict_1 = test(model_1, testDataset_1, batch_size, device)
+    metrics_dict_2 = test(model_2, testDataset_2, batch_size, device)
     
     observe_diff   = metrics_dict_1['accuracy'] - metrics_dict_2['accuracy']
 
     diffs = []
-
+    
     for i in range(num_runs):
         x_boot_1, y_boot_1, x_boot_2, y_boot_2  = getBootstrapSample(trainDataSet_1, trainDataSet_2)
 
-        model_1 = learn(model_empty_1, loss, opt_1, x_boot_1, y_boot_1, device, epochs)
-        model_2 = learn(model_empty_2, loss, opt_2, x_boot_2, y_boot_2, device, epochs)
+        print(f'Training Bootstapped Model-1 #{i}')
+        model_1 = learn(model_empty_1, loss, opt_1, x_boot_1, y_boot_1, device, epochs, batch_size)
+        print(f'Training Bootstapped Model-2 #{i}')
+        model_2 = learn(model_empty_2, loss, opt_2, x_boot_2, y_boot_2, device, epochs, batch_size)
 
-        metrics_dict_1 = test(model_1, testDataset_1)
-        metrics_dict_2 = test(model_2, testDataset_2)
+        metrics_dict_1 = test(model_1, testDataset_1, batch_size, device)
+        metrics_dict_2 = test(model_2, testDataset_2, batch_size, device)
 
         sample_diff   = metrics_dict_1['accuracy'] - metrics_dict_2['accuracy']
 
@@ -61,11 +65,16 @@ def getDataSet(sr, transform):
 
 def toTensor(X_train):
     tot_samples = X_train.shape[0]
-    a, b        = X_train[0].shape
-    inp_flat    = np.zeros((tot_samples, a, b))
+    tensor_shape = X_train[0].shape
+    if len(tensor_shape)==2:
+        a,b = tensor_shape
+        inp_flat    = np.zeros((tot_samples, a,b))
+    if len(tensor_shape)==3:
+        a,b,c = tensor_shape
+        inp_flat    = np.zeros((tot_samples, a,b,c))
 
     for i, item in enumerate(X_train):
-        inp_flat[i, :, :] =  np.array(item)
+        inp_flat[i] =  np.array(item)
 
     return torch.from_numpy(inp_flat)
 
@@ -82,13 +91,13 @@ def getBootstrapSample( trainDataSet_1, trainDataSet_2, replace = True):
 
     x_len            = trainDataSet_1_x.shape[0]
 
-    sample_ind = np.random.choice(x_len, size = x_len, replcae = replace)  
+    sample_ind = np.random.choice(x_len, size = x_len, replace = replace)  
 
     x_boot_1   = trainDataSet_1_x[sample_ind, :]
-    y_boot_1   = trainDataSet_1_y[sample_ind, :]
+    y_boot_1   = trainDataSet_1_y[sample_ind]
 
     x_boot_2   = trainDataSet_2_x[sample_ind, :]
-    y_boot_2   = trainDataSet_2_y[sample_ind, :]
+    y_boot_2   = trainDataSet_2_y[sample_ind]
 
     return x_boot_1, y_boot_1, x_boot_2, y_boot_2
     
@@ -100,6 +109,11 @@ def test(model, testDataset, batch_size, device):
     tot_batches  = len(testLoader)
     lenDataSet   = len(testLoader)
     np_preds     = np.zeros((len(testDataset)))
+
+    runn_acc    = 0
+    runn_prec   = 0
+    runn_rec    = 0
+    runn_f1     = 0
 
     with torch.no_grad():
         for i, (aud, labels) in enumerate(testLoader, start=0):
@@ -149,12 +163,13 @@ def learn(model, loss, opt, train_x, train_y, device, epochs, batch_size):
                 target_batch = train_y[ iter_ * batch_size : ]
                         
             out = model(train_batch)
-            loss_val = loss( out, target_batch)
+            loss_val = loss( out, target_batch.long())
             loss_val.backward()
             opt.step()
             opt.zero_grad()
-
-            print(f"training loss {loss_val.item()}")
+            
+            if iter_%10:
+                print(f"training loss {loss_val.item()}")
 
         # shuffling each epoch
         index = np.arange(0, train_size)

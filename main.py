@@ -29,10 +29,12 @@ opt1 = SGD(model1.parameters(), lr = 0.01, momentum = 0.9)
 opt2 = SGD(model2.parameters(), lr = 0.01, momentum = 0.9) 
 
 loss  = nn.CrossEntropyLoss()
-epochs = 10
+epochs = 2
 batch_size = 32
-num_runs = 10
+num_runs = 5
 SR = 8000
 
-evaluate_Pvalue(model1, model2, transform1, transform2, opt1, opt2, 
+pvalue = evaluate_Pvalue(model1, model2, transform1, transform2, opt1, opt2, 
     loss, SR, batch_size, epochs, num_runs, device)
+
+print(pvalue)
