@@ -23,31 +23,39 @@ def evaluate_Pvalue(model_1, model_2, transform_1, transform_2, opt_1, opt_2, lo
     trainDataSet_2_x, trainDataSet_2_y = np.array(trainDataSet_2)[:, 0], np.array(trainDataSet_2)[:, 1]
     
     print("Training Model-1")
-    model_1 = learn(model_1, loss, opt_1, trainDataSet_1_x, trainDataSet_1_y, device, epochs, batch_size)
-    print("Training Model-2")
-    model_2 = learn(model_2, loss, opt_2, trainDataSet_2_x, trainDataSet_2_y, device, epochs, batch_size)
 
+    model_1 = learn(model_1, loss, opt_1, trainDataSet_1_x, trainDataSet_1_y, device, epochs, batch_size)
     metrics_dict_1 = test(model_1, testDataset_1, batch_size, device)
+    
+    print("Training Model-2")
+    
+    model_2 = learn(model_2, loss, opt_2, trainDataSet_2_x, trainDataSet_2_y, device, epochs, batch_size)
     metrics_dict_2 = test(model_2, testDataset_2, batch_size, device)
     
     observe_diff   = metrics_dict_1['accuracy'] - metrics_dict_2['accuracy']
+
+    print(f" observe_diff between {model_1.__class__.__name__} and {model_2.__class__.__name__} : {observe_diff}")
 
     diffs = []
     
     for i in range(num_runs):
         x_boot_1, y_boot_1, x_boot_2, y_boot_2  = getBootstrapSample(trainDataSet_1, trainDataSet_2)
 
-        print(f'Training Bootstapped Model-1 #{i}')
+        print(f'Training Bootstapped Model-1 Sample#{i+1}')
         model_1 = learn(model_empty_1, loss, opt_1, x_boot_1, y_boot_1, device, epochs, batch_size)
-        print(f'Training Bootstapped Model-2 #{i}')
-        model_2 = learn(model_empty_2, loss, opt_2, x_boot_2, y_boot_2, device, epochs, batch_size)
-
         metrics_dict_1 = test(model_1, testDataset_1, batch_size, device)
+
+        print(f'Training Bootstapped Model-2 Sample#{i+1}')
+        model_2 = learn(model_empty_2, loss, opt_2, x_boot_2, y_boot_2, device, epochs, batch_size)
         metrics_dict_2 = test(model_2, testDataset_2, batch_size, device)
 
         sample_diff   = metrics_dict_1['accuracy'] - metrics_dict_2['accuracy']
 
         diffs.append(sample_diff)
+
+        print(f"sample difference between models for bootstrap {i} : {sample_diff}")
+
+    print(diffs)
 
     p_value = (np.sum(diffs >= observe_diff) + np.sum(diffs <= -observe_diff)) / num_runs
 
@@ -109,6 +117,8 @@ def test(model, testDataset, batch_size, device):
     tot_batches  = len(testLoader)
     lenDataSet   = len(testLoader)
     np_preds     = np.zeros((len(testDataset)))
+    
+    metrics_dict = None
 
     runn_acc    = 0
     runn_prec   = 0
@@ -139,6 +149,8 @@ def test(model, testDataset, batch_size, device):
     metrics_dict["recall"] = runn_rec/lenDataSet
     metrics_dict["f1"] = runn_f1/lenDataSet
 
+    print(f"Test model : {model.__class__.__name__} accuracy : {runn_acc/lenDataSet} f1 : {runn_f1/lenDataSet} ")
+
     return metrics_dict
 
 def learn(model, loss, opt, train_x, train_y, device, epochs, batch_size):
@@ -168,8 +180,7 @@ def learn(model, loss, opt, train_x, train_y, device, epochs, batch_size):
             opt.step()
             opt.zero_grad()
             
-            if iter_%10:
-                print(f"training loss {loss_val.item()}")
+            print(f"Train model : {model.__class__.__name__} Epoch {epoch}/{epochs} iter  {iter_}/{total_iter}  training loss {loss_val.item()}")
 
         # shuffling each epoch
         index = np.arange(0, train_size)

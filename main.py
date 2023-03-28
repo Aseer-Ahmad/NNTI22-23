@@ -5,7 +5,7 @@ from helpers.preprocessor import transformMelSpecByTruncate1D, transformMelSpecB
 from models.cnn import CNN1D, CNN2D
 
 import torch.nn as nn
-from torch.optim import SGD
+from torch.optim import SGD, Adam
 import torch
 
 import os
@@ -24,13 +24,13 @@ transform2 = transformMelSpecByTruncate2D
 model1 = CNN1D()
 model2 = CNN2D()
 
-opt1 = SGD(model1.parameters(), lr = 0.01, momentum = 0.9) 
-opt2 = SGD(model2.parameters(), lr = 0.01, momentum = 0.9) 
+opt1 = Adam(model1.parameters(), lr = 0.001) 
+opt2 = Adam(model2.parameters(), lr = 0.001) 
 
 loss  = nn.CrossEntropyLoss()
-epochs = 2
+epochs = 10
 batch_size = 32
-num_runs = 5
+num_runs = 20
 SR = 8000
 
 pvalue = evaluate_Pvalue(model1, model2, transform1, transform2, opt1, opt2, 
